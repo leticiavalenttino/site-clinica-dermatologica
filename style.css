@@ -126,3 +126,77 @@ th,td{text-align:left;padding:8px;border-bottom:1px solid var(--border);}
     white-space:normal;
   }
 }
+
+@media (max-width: 700px){
+  .shell{
+    flex-direction:column;
+  }
+  .sidebar{
+    width:100%;
+    padding:16px;
+  }
+  .sidebar h3{
+    font-size:0.95rem;
+  }
+  .sidebar nav{
+    flex-direction:row;
+    flex-wrap:wrap;
+    margin:12px 0;
+  }
+  .sidebar nav button{
+    width:auto;
+    padding:8px 12px;
+    font-size:0.85rem;
+  }
+  .sidebar #btn-logout{
+    width:auto;
+  }
+  .main{
+    padding:16px;
+  }
+  .panel{
+    padding:16px;
+    overflow-x:auto;
+  }
+  table{
+    font-size:0.85rem;
+    min-width:520px;
+  }
+}
+
+@media (max-width: 700px){
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width: 700px){
+  td input[type="number"]{
+    width:50px;
+  }
+  td .btn{
+    display:block;
+    margin-top:6px;
+    width:100%;
+  }
+}
+
+@media (max-width: 700px){
+  .login-wrap{
+    padding:16px;
+  }
+}
+
+@media (max-width: 700px){
+  td small{
+    display:block;
+    font-size:0.72rem;
+    line-height:1.3;
+  }
+}
+
+@media (max-width: 700px){
+  h1{
+    font-size:1.4rem;
+  }
+}
