@@ -14,9 +14,11 @@ export function renderShell(tabContentHtml, modalHtml){
     <div class="shell">
       <aside class="sidebar">
         <h3>Dra. Dermato | Controle de Estoque</h3>
-        <p>${state.currentUser.usuario} (${state.currentUser.papel})</p>
+        <div class="sidebar-user-row">
+          <p>${state.currentUser.usuario} (${state.currentUser.papel})</p>
+          <button id="btn-logout">Sair</button>
+        </div>
         <nav>${renderNavButtons()}</nav>
-        <button id="btn-logout">Sair</button>
       </aside>
       <main class="main">
         ${tabContentHtml}
