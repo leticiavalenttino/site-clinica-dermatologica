@@ -10,6 +10,7 @@ export async function addProduto(dados){
   const novo = {
     id: uid(),
     nome: dados.nome.trim(),
+    descricao: (dados.descricao || '').trim(),
     valor: Number(dados.valor) || 0,
     estoque: Number(dados.estoque) || 0,
     limite: Number(dados.limite) || 0,
@@ -17,6 +18,7 @@ export async function addProduto(dados){
   };
   state.produtos.push(novo);
   await setData('produtos', state.produtos);
+  await registrarMovimentacao('Produto cadastrado', novo.nome, novo.estoque);
 }
 
 export function produtosBaixoEstoque(){
@@ -91,4 +93,21 @@ export async function confirmarCompraEspecial(RQEDigitado){
 
 export function cancelarConfirmacao(){
   state.confirmModal = null;
+}
+
+export async function removeProduto(id){
+  if(state.currentUser.papel !== 'admin'){
+    alert('Somente a administração pode remover produtos.');
+    return;
+  }
+
+  const alvo = state.produtos.find(p => p.id === id);
+  if(!alvo) return;
+
+  const confirmou = confirm(`Remover o produto "${alvo.nome}"? Essa ação não pode ser desfeita.`);
+  if(!confirmou) return;
+
+  state.produtos = state.produtos.filter(p => p.id !== id);
+  await setData('produtos', state.produtos);
+  await registrarMovimentacao('Produto removido', alvo.nome, alvo.estoque);
 }

@@ -64,7 +64,6 @@ export function wireUsuarios(render){
     );
     render();
   });
-
   document.querySelectorAll('[data-remove-user]').forEach(btn => {
     btn.addEventListener('click', () => {
       removeUsuario(btn.dataset.removeUser).then(render);

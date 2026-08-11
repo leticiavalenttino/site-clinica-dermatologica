@@ -14,6 +14,7 @@ export function attemptLogin(identificador, senha){
   state.loginError = '';
   state.currentUser = u;
   state.activeTab = 'dashboard';
+  setData('sessaoUsuarioId', u.id);
 }
 
 export async function addUsuario(usuario, senha, papel, RQE){
@@ -62,6 +63,76 @@ export async function removeUsuario(id){
 
   state.usuarios = state.usuarios.filter(u => u.id !== id);
   await setData('usuarios', state.usuarios);
+}
+
+export async function atualizarNomeUsuario(novoNome){
+  const nome = novoNome.trim();
+  if(!nome) return alert('Informe um nome de usuário.');
+
+  const jaExiste = state.usuarios.some(u => u.id !== state.currentUser.id && u.usuario.toLowerCase() === nome.toLowerCase());
+  if(jaExiste) return alert('Já existe um usuário com esse nome.');
+
+  const idx = state.usuarios.findIndex(u => u.id === state.currentUser.id);
+  state.usuarios[idx] = { ...state.usuarios[idx], usuario: nome };
+  state.currentUser = state.usuarios[idx];
+  await setData('usuarios', state.usuarios);
+  alert('Nome atualizado com sucesso.');
+}
+
+export async function alterarSenha(senhaAtual, novaSenha, confirmarSenha){
+  const idx = state.usuarios.findIndex(u => u.id === state.currentUser.id);
+  const u = state.usuarios[idx];
+
+  if(u.senha !== senhaAtual) return alert('Senha atual incorreta.');
+  if(!novaSenha.trim()) return alert('Informe a nova senha.');
+  if(novaSenha !== confirmarSenha) return alert('As senhas digitadas não são iguais.');
+
+  state.usuarios[idx] = { ...u, senha: novaSenha };
+  state.currentUser = state.usuarios[idx];
+  await setData('usuarios', state.usuarios);
+  alert('Senha alterada com sucesso.');
+}
+
+export async function solicitarRedefinicaoSenha(email){
+  const alvo = state.usuarios.find(u => u.email && u.email.toLowerCase() === email.trim().toLowerCase());
+  if(!alvo){
+    alert('Não encontramos nenhuma conta cadastrada com esse e-mail.');
+    return null;
+  }
+  const token = uid() + uid();
+  state.resetTokens = state.resetTokens.filter(t => t.usuarioId !== alvo.id);
+  state.resetTokens.push({ token, usuarioId: alvo.id, criadoEm: Date.now() });
+  await setData('resetTokens', state.resetTokens);
+  const url = new URL(window.location.href);
+  url.search = '';
+  url.searchParams.set('reset', token);
+  return { link: url.toString(), email: alvo.email };
+}
+
+export async function redefinirSenhaComToken(token, novaSenha, confirmarSenha){
+  const registro = state.resetTokens.find(t => t.token === token);
+  if(!registro){
+    alert('Link de redefinição inválido ou expirado.');
+    return false;
+  }
+  if(!novaSenha.trim()){
+    alert('Informe a nova senha.');
+    return false;
+  }
+  if(novaSenha !== confirmarSenha){
+    alert('As senhas digitadas não são iguais.');
+    return false;
+  }
+  const idx = state.usuarios.findIndex(u => u.id === registro.usuarioId);
+  if(idx === -1){
+    alert('Usuário não encontrado.');
+    return false;
+  }
+  state.usuarios[idx] = { ...state.usuarios[idx], senha: novaSenha };
+  state.resetTokens = state.resetTokens.filter(t => t.token !== token);
+  await setData('usuarios', state.usuarios);
+  await setData('resetTokens', state.resetTokens);
+  return true;
 }
 
 export async function completarPerfil(dados){

@@ -6,5 +6,11 @@ export const state = {
   activeTab: 'dashboard',
   loginError: '',
   confirmModal: null,
-  mostrarFormNovoProduto: false
+  mostrarFormNovoProduto: false,
+  sidebarColapsada: false,
+  mostrarPerfil: false,
+  resetTokens: [],
+  resetTokenAtivo: null,
+  telaEsqueciSenha: false,
+  resetLinkGerado: null
 };

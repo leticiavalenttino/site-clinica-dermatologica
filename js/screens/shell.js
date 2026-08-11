@@ -1,4 +1,5 @@
 import { state } from '../state.js';
+import { setData } from '../storage.js';
 
 export function renderNavButtons(){
   const item = (tab, label) => `<button data-tab="${tab}" class="${state.activeTab===tab?'active':''}">${label}</button>`;
@@ -8,14 +9,14 @@ export function renderNavButtons(){
   }
   return item('dashboard','Visão geral') + item('estoque','Catálogo') + item('movimentacao','Movimentação');
 }
-
 export function renderShell(tabContentHtml, modalHtml){
   return `
     <div class="shell">
-      <aside class="sidebar">
-        <h3>Dra. Dermato | Controle de Estoque</h3>
+      <aside class="sidebar ${state.sidebarColapsada ? 'collapsed' : ''}">
+        <button id="btn-toggle-sidebar" class="sidebar-toggle" aria-label="Recolher menu">☰</button>
+        <h2>Dra. Dermato | Controle de Estoque</h2>
         <div class="sidebar-user-row">
-          <p>${state.currentUser.usuario} (${state.currentUser.papel})</p>
+          <button id="btn-abrir-perfil" class="sidebar-user-btn">${state.currentUser.usuario} (${state.currentUser.papel})</button>
           <button id="btn-logout">Sair</button>
         </div>
         <nav>${renderNavButtons()}</nav>
@@ -27,10 +28,18 @@ export function renderShell(tabContentHtml, modalHtml){
     ${modalHtml || ''}
   `;
 }
-
 export function wireShellChrome(render){
   document.getElementById('btn-logout').addEventListener('click', ()=>{
     state.currentUser = null;
+    setData('sessaoUsuarioId', null);
+    render();
+  });
+  document.getElementById('btn-toggle-sidebar').addEventListener('click', ()=>{
+    state.sidebarColapsada = !state.sidebarColapsada;
+    document.querySelector('.sidebar').classList.toggle('collapsed', state.sidebarColapsada);
+  });
+  document.getElementById('btn-abrir-perfil').addEventListener('click', ()=>{
+    state.mostrarPerfil = true;
     render();
   });
   document.querySelectorAll('.sidebar nav button').forEach(btn=>{

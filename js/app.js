@@ -1,8 +1,8 @@
 import { state } from './state.js';
 import { getData, setData, uid } from './storage.js';
-
 import { renderLogin, wireLogin } from './screens/login.js';
 import { renderConfigurarPerfil, wireConfigurarPerfil } from './screens/configurarPerfil.js';
+import { renderRedefinirSenha, wireRedefinirSenha } from './screens/redefinirSenha.js';
 import { renderShell, wireShellChrome } from './screens/shell.js';
 import { renderDashboard } from './screens/dashboard.js';
 import { renderUsuarios, wireUsuarios } from './screens/usuarios.js';
@@ -10,6 +10,7 @@ import { renderProdutos, wireProdutos } from './screens/produtos.js';
 import { renderEstoqueOperacional, wireEstoque } from './screens/estoque.js';
 import { renderMovimentacao, wireMovimentacao } from './screens/movimentacao.js';
 import { renderConfirmModal, wireConfirmModal } from './screens/confirmModal.js';
+import { renderPerfilModal, wirePerfilModal } from './screens/perfil.js';
 
 function renderTabContent(){
   if(state.activeTab === 'produtos') return renderProdutos();
@@ -28,17 +29,23 @@ function wireTabContent(){
 
 function render(){
   const app = document.getElementById('app');
-  if(!state.currentUser){
+  if(state.resetTokenAtivo){
+    app.innerHTML = renderRedefinirSenha();
+    wireRedefinirSenha(render);
+  } else if(!state.currentUser){
     app.innerHTML = renderLogin();
     wireLogin(render);
   } else if(state.currentUser.precisaConfigurar){
     app.innerHTML = renderConfigurarPerfil();
     wireConfigurarPerfil(render);
   } else {
-    const modalHtml = state.confirmModal ? renderConfirmModal() : '';
+    const modalHtml = (state.mostrarPerfil ? renderPerfilModal() : '') + (state.confirmModal ? renderConfirmModal() : '');
     app.innerHTML = renderShell(renderTabContent(), modalHtml);
     wireShellChrome(render);
     wireTabContent();
+    if(state.mostrarPerfil){
+      wirePerfilModal(render);
+    }
     if(state.confirmModal){
       wireConfirmModal(render);
     }
@@ -53,6 +60,16 @@ async function init(){
   }
   state.produtos = await getData('produtos', []);
   state.movimentacoes = await getData('movimentacoes', []);
+  state.resetTokens = await getData('resetTokens', []);
+
+  const sessaoId = await getData('sessaoUsuarioId', null);
+  if(sessaoId){
+    const usuarioSalvo = state.usuarios.find(u => u.id === sessaoId);
+    if(usuarioSalvo) state.currentUser = usuarioSalvo;
+  }
+
+  state.resetTokenAtivo = new URLSearchParams(window.location.search).get('reset');
+
   render();
 }
 

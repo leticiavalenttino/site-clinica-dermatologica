@@ -11,22 +11,26 @@ export function renderEstoqueOperacional(){
     </div>
     ${renderAlertBanner()}
     ${state.mostrarFormNovoProduto ? `
-    <div class="panel">
-      <h3>Cadastrar novo produto</h3>
-      <form id="form-produto-estoque">
-        <div class="field"><label>Nome</label><input id="npe-nome" type="text" required></div>
-        <div class="field"><label>Valor (R$)</label><input id="npe-valor" type="number" step="0.01" required></div>
-        <div class="field"><label>Estoque inicial</label><input id="npe-estoque" type="number" required></div>
-        <div class="field"><label>Estoque mínimo</label><input id="npe-limite" type="number" required></div>
-        <div class="field">
-          <label>Tipo</label>
-          <select id="npe-tipo">
-            <option value="simples">Simples</option>
-            <option value="especial">Especial</option>
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Cadastrar produto</button>
-      </form>
+    <div class="modal-backdrop" id="backdrop-novo-produto">
+      <div class="modal modal-lg">
+        <h2>Cadastrar novo produto</h2>
+        <form id="form-produto-estoque">
+          <div class="field"><label>Nome</label><input id="npe-nome" type="text" required></div>
+          <div class="field"><label>Descrição</label><input id="npe-descricao" type="text"></div>
+          <div class="field"><label>Valor (R$)</label><input id="npe-valor" type="number" step="0.01" required></div>
+          <div class="field"><label>Estoque inicial</label><input id="npe-estoque" type="number" required></div>
+          <div class="field"><label>Estoque mínimo</label><input id="npe-limite" type="number" required></div>
+          <div class="field">
+            <label>Tipo</label>
+            <select id="npe-tipo">
+              <option value="simples">Simples</option>
+              <option value="especial">Especial</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Cadastrar produto</button>
+          <button type="button" class="btn" id="btn-cancelar-novo-produto">Cancelar</button>
+        </form>
+      </div>
     </div>
     ` : ''}
     <div class="panel">
@@ -74,12 +78,31 @@ export function wireEstoque(render){
     render();
   });
 
+  const btnCancelar = document.getElementById('btn-cancelar-novo-produto');
+  if(btnCancelar){
+    btnCancelar.addEventListener('click', () => {
+      state.mostrarFormNovoProduto = false;
+      render();
+    });
+  }
+
+  const backdrop = document.getElementById('backdrop-novo-produto');
+  if(backdrop){
+    backdrop.addEventListener('click', (e) => {
+      if(e.target === backdrop){
+        state.mostrarFormNovoProduto = false;
+        render();
+      }
+    });
+  }
+
   const formProdutoEstoque = document.getElementById('form-produto-estoque');
   if(formProdutoEstoque){
     formProdutoEstoque.addEventListener('submit', async (e)=>{
       e.preventDefault();
       await addProduto({
         nome: document.getElementById('npe-nome').value,
+        descricao: document.getElementById('npe-descricao').value,
         valor: document.getElementById('npe-valor').value,
         estoque: document.getElementById('npe-estoque').value,
         limite: document.getElementById('npe-limite').value,
