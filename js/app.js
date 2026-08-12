@@ -11,12 +11,14 @@ import { renderEstoqueOperacional, wireEstoque } from './screens/estoque.js';
 import { renderMovimentacao, wireMovimentacao } from './screens/movimentacao.js';
 import { renderConfirmModal, wireConfirmModal } from './screens/confirmModal.js';
 import { renderPerfilModal, wirePerfilModal } from './screens/perfil.js';
+import { renderPacientes, wirePacientes } from './screens/pacientes.js';
 
 function renderTabContent(){
   if(state.activeTab === 'produtos') return renderProdutos();
   if(state.activeTab === 'usuarios') return renderUsuarios();
   if(state.activeTab === 'estoque') return renderEstoqueOperacional();
   if(state.activeTab === 'movimentacao') return renderMovimentacao();
+  if(state.activeTab === 'pacientes') return renderPacientes();
   return renderDashboard();
 }
 
@@ -25,6 +27,7 @@ function wireTabContent(){
   if(state.activeTab === 'usuarios') return wireUsuarios(render);
   if(state.activeTab === 'estoque') return wireEstoque(render);
   if(state.activeTab === 'movimentacao') return wireMovimentacao(render);
+  if(state.activeTab === 'pacientes') return wirePacientes(render);
 }
 
 function render(){
@@ -60,6 +63,7 @@ async function init(){
   }
   state.produtos = await getData('produtos', []);
   state.movimentacoes = await getData('movimentacoes', []);
+  state.pacientes = await getData('pacientes', []);
   state.resetTokens = await getData('resetTokens', []);
 
   const sessaoId = await getData('sessaoUsuarioId', null);

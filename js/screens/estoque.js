@@ -2,15 +2,10 @@ import { state } from '../state.js';
 import { addProduto, adicionarEntrada, darBaixaSimples, abrirConfirmacaoEspecial } from '../models/produtos.js';
 import { renderAlertBanner } from './dashboard.js';
 
-export function renderEstoqueOperacional(){
-  const podeEspecial = state.currentUser.papel === 'dermatologista';
+const ICONE_MOVIMENTACAO = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>`;
+
+function renderModalNovoProduto(){
   return `
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <h1>Catálogo</h1>
-      <button id="btn-toggle-novo-produto" class="btn btn-primary" title="Cadastrar novo produto" style="font-size:1.3rem;line-height:1;padding:8px 16px;">+</button>
-    </div>
-    ${renderAlertBanner()}
-    ${state.mostrarFormNovoProduto ? `
     <div class="modal-backdrop" id="backdrop-novo-produto">
       <div class="modal modal-lg">
         <h2>Cadastrar novo produto</h2>
@@ -32,41 +27,74 @@ export function renderEstoqueOperacional(){
         </form>
       </div>
     </div>
-    ` : ''}
+  `;
+}
+
+function renderModalRegistrarMovimentacao(){
+  const p = state.produtos.find(x => x.id === state.produtoMovimentandoId);
+  if(!p) return '';
+  const isEspecial = p.tipo === 'especial';
+  const podeEspecial = state.currentUser.papel === 'dermatologista';
+  const bloqueado = isEspecial && !podeEspecial;
+  return `
+    <div class="modal-backdrop" id="backdrop-registrar-mov">
+      <div class="modal">
+        <h3>Registrar movimentação</h3>
+        <p style="color:var(--muted);font-size:0.9rem;margin-top:-8px;">${p.nome}</p>
+        <form id="form-registrar-mov">
+          <div class="field">
+            <label>Tipo</label>
+            <select id="rm-tipo">
+              <option value="entrada">Entrada</option>
+              ${bloqueado ? '' : `<option value="saida">${isEspecial ? 'Aprovar com senha' : 'Registrar uso'}</option>`}
+            </select>
+          </div>
+          <div class="field"><label>Quantidade</label><input id="rm-quantidade" type="number" min="1" required></div>
+          ${bloqueado ? '<p style="color:var(--muted);font-size:0.85rem;">Somente a dermatologista pode retirar este item.</p>' : ''}
+          <button type="submit" class="btn btn-primary">Confirmar</button>
+          <button type="button" class="btn" id="btn-cancelar-registrar-mov">Cancelar</button>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+export function renderEstoqueOperacional(){
+  const termo = state.buscaCatalogo.trim().toLowerCase();
+  const produtosFiltrados = termo
+    ? state.produtos.filter(p => p.nome.toLowerCase().includes(termo))
+    : state.produtos;
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h1>Catálogo</h1>
+      <button id="btn-toggle-novo-produto" class="btn btn-primary" title="Cadastrar novo produto" style="font-size:1.3rem;line-height:1;padding:8px 16px;">+</button>
+    </div>
+    ${renderAlertBanner()}
+    ${state.mostrarFormNovoProduto ? renderModalNovoProduto() : ''}
+    ${state.produtoMovimentandoId ? renderModalRegistrarMovimentacao() : ''}
     <div class="panel">
-      <h3>Catálogo e movimentação</h3>
+      <div class="field" style="margin-bottom:16px;">
+        <input id="busca-catalogo" type="text" placeholder="Buscar produto por nome..." value="${state.buscaCatalogo}">
+      </div>
       ${state.produtos.length === 0 ? '<p>Nenhum produto cadastrado ainda.</p>' : `
-        <table>
-          <thead><tr><th>Produto</th><th>Tipo</th><th>Estoque</th><th>Estoque mínimo</th><th>Entrada</th><th>Registrar uso</th></tr></thead>
+        <table id="tabela-catalogo">
+          <thead><tr><th>Produto</th><th>Tipo</th><th>Estoque</th><th>Estoque mínimo</th><th></th></tr></thead>
           <tbody>
-            ${state.produtos.map(p => {
-              const isEspecial = p.tipo === 'especial';
-              const bloqueado = isEspecial && !podeEspecial;
-              return `
-                <tr>
+            ${produtosFiltrados.map(p => `
+                <tr data-nome="${p.nome.toLowerCase()}">
                   <td class="${p.estoque < p.limite ? 'nome-baixo' : ''}">${p.nome}</td>
                   <td>${p.tipo}</td>
                   <td>${p.estoque}</td>
                   <td>${p.limite}</td>
                   <td>
-                    <input type="number" min="1" style="width:60px" id="entrada-${p.id}">
-                    <button class="btn btn-primary" data-entrada="${p.id}">Registrar entrada</button>
-                  </td>
-                  <td>
-                    ${bloqueado
-                      ? '<small>Somente a dermatologista pode retirar este item.</small>'
-                      : `
-                        <input type="number" min="1" style="width:60px" id="qty-${p.id}">
-                        <button class="btn btn-primary" data-baixa="${p.id}" data-especial="${isEspecial ? '1' : '0'}">
-                          ${isEspecial ? 'Aprovar c/ RQE' : 'Registrar uso'}
-                        </button>
-                      `}
+                    <button class="btn btn-primary btn-icon" data-registrar-mov="${p.id}">${ICONE_MOVIMENTACAO} Registrar Movimentação</button>
                   </td>
                 </tr>
-              `;
-            }).join('')}
+              `).join('')}
           </tbody>
         </table>
+        <p id="busca-catalogo-vazio" style="display:none;color:var(--muted);margin-top:12px;">Nenhum produto encontrado.</p>
       `}
     </div>
   `;
@@ -112,28 +140,68 @@ export function wireEstoque(render){
     });
   }
 
-  document.querySelectorAll('[data-entrada]').forEach(btn => {
+  const buscaInput = document.getElementById('busca-catalogo');
+  if(buscaInput){
+    buscaInput.addEventListener('input', () => {
+      state.buscaCatalogo = buscaInput.value;
+      const termo = buscaInput.value.trim().toLowerCase();
+      let algumVisivel = false;
+      document.querySelectorAll('#tabela-catalogo tbody tr').forEach(tr => {
+        const visivel = tr.dataset.nome.includes(termo);
+        tr.style.display = visivel ? '' : 'none';
+        if(visivel) algumVisivel = true;
+      });
+      const vazio = document.getElementById('busca-catalogo-vazio');
+      if(vazio) vazio.style.display = algumVisivel ? 'none' : 'block';
+    });
+  }
+
+  document.querySelectorAll('[data-registrar-mov]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const id = btn.dataset.entrada;
-      const qtyInput = document.getElementById('entrada-' + id);
-      const qty = qtyInput ? qtyInput.value : '';
-      adicionarEntrada(id, qty).then(render);
+      state.produtoMovimentandoId = btn.dataset.registrarMov;
+      render();
     });
   });
 
-  document.querySelectorAll('[data-baixa]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.baixa;
-      const especial = btn.dataset.especial === '1';
-      const qtyInput = document.getElementById('qty-' + id);
-      const qty = qtyInput ? qtyInput.value : '';
+  const btnCancelarMov = document.getElementById('btn-cancelar-registrar-mov');
+  if(btnCancelarMov){
+    btnCancelarMov.addEventListener('click', () => {
+      state.produtoMovimentandoId = null;
+      render();
+    });
+  }
 
-      if(especial){
-        abrirConfirmacaoEspecial(id, qty);
+  const backdropMov = document.getElementById('backdrop-registrar-mov');
+  if(backdropMov){
+    backdropMov.addEventListener('click', (e) => {
+      if(e.target === backdropMov){
+        state.produtoMovimentandoId = null;
         render();
-      } else {
-        darBaixaSimples(id, qty).then(render);
       }
     });
-  });
+  }
+
+  const formRegistrarMov = document.getElementById('form-registrar-mov');
+  if(formRegistrarMov){
+    formRegistrarMov.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = state.produtoMovimentandoId;
+      const p = state.produtos.find(x => x.id === id);
+      const tipo = document.getElementById('rm-tipo').value;
+      const quantidade = document.getElementById('rm-quantidade').value;
+      const isEspecial = p && p.tipo === 'especial';
+
+      if(tipo === 'entrada'){
+        adicionarEntrada(id, quantidade).then(render);
+      } else if(isEspecial){
+        state.produtoMovimentandoId = null;
+        abrirConfirmacaoEspecial(id, quantidade);
+        render();
+        return;
+      } else {
+        darBaixaSimples(id, quantidade).then(render);
+      }
+      state.produtoMovimentandoId = null;
+    });
+  }
 }

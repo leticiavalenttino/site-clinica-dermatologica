@@ -5,16 +5,16 @@ export function renderNavButtons(){
   const item = (tab, label) => `<button data-tab="${tab}" class="${state.activeTab===tab?'active':''}">${label}</button>`;
 
   if(state.currentUser.papel === 'admin'){
-    return item('dashboard','Visão geral') + item('produtos','Produtos') + item('usuarios','Usuários') + item('movimentacao','Movimentação');
+    return item('dashboard','Visão geral') + item('produtos','Produtos') + item('usuarios','Usuários') + item('pacientes','Pacientes') + item('movimentacao','Movimentação');
   }
-  return item('dashboard','Visão geral') + item('estoque','Catálogo') + item('movimentacao','Movimentação');
+  return item('dashboard','Visão geral') + item('estoque','Catálogo') + item('pacientes','Pacientes') + item('movimentacao','Movimentação');
 }
 export function renderShell(tabContentHtml, modalHtml){
   return `
     <div class="shell">
       <aside class="sidebar ${state.sidebarColapsada ? 'collapsed' : ''}">
         <button id="btn-toggle-sidebar" class="sidebar-toggle" aria-label="Recolher menu">☰</button>
-        <h2>Dra. Dermato | Controle de Estoque</h2>
+        <h2 class="brand-title">Dra. Dermato | Dermatologia e Estética</h2>
         <div class="sidebar-user-row">
           <button id="btn-abrir-perfil" class="sidebar-user-btn">${state.currentUser.usuario} (${state.currentUser.papel})</button>
           <button id="btn-logout">Sair</button>

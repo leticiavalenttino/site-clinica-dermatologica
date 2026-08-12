@@ -1,5 +1,6 @@
 import { state } from '../state.js';
 import { setData, uid } from '../storage.js';
+import { notify, confirmar } from '../components/notify.js';
 
 export function attemptLogin(identificador, senha){
   const ident = identificador.trim().toLowerCase();
@@ -19,15 +20,15 @@ export function attemptLogin(identificador, senha){
 
 export async function addUsuario(usuario, senha, papel, RQE){
   if(!usuario.trim() || !senha.trim()){
-    alert('Preencha usuário e senha.');
+    notify('Preencha usuário e senha.', 'error');
     return;
   }
   if(state.usuarios.some(u => u.usuario.toLowerCase() === usuario.trim().toLowerCase())){
-    alert('Já existe um usuário com esse nome.');
+    notify('Já existe um usuário com esse nome.', 'error');
     return;
   }
   if(papel === 'dermatologista' && !RQE.trim()){
-    alert('Informe o RQE da dermatologista.');
+    notify('Informe o RQE da dermatologista.', 'error');
     return;
   }
   const novo = {
@@ -41,6 +42,7 @@ export async function addUsuario(usuario, senha, papel, RQE){
   };
   state.usuarios.push(novo);
   await setData('usuarios', state.usuarios);
+  notify('Usuário cadastrado com sucesso.', 'success');
 }
 
 export async function removeUsuario(id){
@@ -48,55 +50,56 @@ export async function removeUsuario(id){
   if(!alvo) return;
 
   if(alvo.id === state.currentUser.id){
-    alert('Você não pode remover o usuário com o qual está logada agora.');
+    notify('Você não pode remover o usuário com o qual está logada agora.', 'error');
     return;
   }
 
   const totalAdmins = state.usuarios.filter(u => u.papel === 'admin').length;
   if(alvo.papel === 'admin' && totalAdmins <= 1){
-    alert('Não é possível remover o único administrador do sistema.');
+    notify('Não é possível remover o único administrador do sistema.', 'error');
     return;
   }
 
-  const confirmou = confirm(`Remover o usuário "${alvo.usuario}"? Essa ação não pode ser desfeita.`);
+  const confirmou = await confirmar(`Remover o usuário "${alvo.usuario}"? Essa ação não pode ser desfeita.`);
   if(!confirmou) return;
 
   state.usuarios = state.usuarios.filter(u => u.id !== id);
   await setData('usuarios', state.usuarios);
+  notify('Usuário removido.', 'success');
 }
 
 export async function atualizarNomeUsuario(novoNome){
   const nome = novoNome.trim();
-  if(!nome) return alert('Informe um nome de usuário.');
+  if(!nome) return notify('Informe um nome de usuário.', 'error');
 
   const jaExiste = state.usuarios.some(u => u.id !== state.currentUser.id && u.usuario.toLowerCase() === nome.toLowerCase());
-  if(jaExiste) return alert('Já existe um usuário com esse nome.');
+  if(jaExiste) return notify('Já existe um usuário com esse nome.', 'error');
 
   const idx = state.usuarios.findIndex(u => u.id === state.currentUser.id);
   state.usuarios[idx] = { ...state.usuarios[idx], usuario: nome };
   state.currentUser = state.usuarios[idx];
   await setData('usuarios', state.usuarios);
-  alert('Nome atualizado com sucesso.');
+  notify('Nome atualizado com sucesso.', 'success');
 }
 
 export async function alterarSenha(senhaAtual, novaSenha, confirmarSenha){
   const idx = state.usuarios.findIndex(u => u.id === state.currentUser.id);
   const u = state.usuarios[idx];
 
-  if(u.senha !== senhaAtual) return alert('Senha atual incorreta.');
-  if(!novaSenha.trim()) return alert('Informe a nova senha.');
-  if(novaSenha !== confirmarSenha) return alert('As senhas digitadas não são iguais.');
+  if(u.senha !== senhaAtual) return notify('Senha atual incorreta.', 'error');
+  if(!novaSenha.trim()) return notify('Informe a nova senha.', 'error');
+  if(novaSenha !== confirmarSenha) return notify('As senhas digitadas não são iguais.', 'error');
 
   state.usuarios[idx] = { ...u, senha: novaSenha };
   state.currentUser = state.usuarios[idx];
   await setData('usuarios', state.usuarios);
-  alert('Senha alterada com sucesso.');
+  notify('Senha alterada com sucesso.', 'success');
 }
 
 export async function solicitarRedefinicaoSenha(email){
   const alvo = state.usuarios.find(u => u.email && u.email.toLowerCase() === email.trim().toLowerCase());
   if(!alvo){
-    alert('Não encontramos nenhuma conta cadastrada com esse e-mail.');
+    notify('Não encontramos nenhuma conta cadastrada com esse e-mail.', 'error');
     return null;
   }
   const token = uid() + uid();
@@ -112,20 +115,20 @@ export async function solicitarRedefinicaoSenha(email){
 export async function redefinirSenhaComToken(token, novaSenha, confirmarSenha){
   const registro = state.resetTokens.find(t => t.token === token);
   if(!registro){
-    alert('Link de redefinição inválido ou expirado.');
+    notify('Link de redefinição inválido ou expirado.', 'error');
     return false;
   }
   if(!novaSenha.trim()){
-    alert('Informe a nova senha.');
+    notify('Informe a nova senha.', 'error');
     return false;
   }
   if(novaSenha !== confirmarSenha){
-    alert('As senhas digitadas não são iguais.');
+    notify('As senhas digitadas não são iguais.', 'error');
     return false;
   }
   const idx = state.usuarios.findIndex(u => u.id === registro.usuarioId);
   if(idx === -1){
-    alert('Usuário não encontrado.');
+    notify('Usuário não encontrado.', 'error');
     return false;
   }
   state.usuarios[idx] = { ...state.usuarios[idx], senha: novaSenha };
@@ -137,21 +140,21 @@ export async function redefinirSenhaComToken(token, novaSenha, confirmarSenha){
 
 export async function completarPerfil(dados){
   if(!dados.usuario.trim() || !dados.email.trim() || !dados.senha.trim()){
-    alert('Preencha todos os campos.');
+    notify('Preencha todos os campos.', 'error');
     return;
   }
   if(!dados.email.includes('@') || !dados.email.includes('.')){
-    alert('Informe um e-mail válido.');
+    notify('Informe um e-mail válido.', 'error');
     return;
   }
   const usuarioExiste = state.usuarios.some(u => u.id !== state.currentUser.id && u.usuario.toLowerCase() === dados.usuario.trim().toLowerCase());
   if(usuarioExiste){
-    alert('Já existe um usuário com esse nome.');
+    notify('Já existe um usuário com esse nome.', 'error');
     return;
   }
   const emailExiste = state.usuarios.some(u => u.id !== state.currentUser.id && u.email && u.email.toLowerCase() === dados.email.trim().toLowerCase());
   if(emailExiste){
-    alert('Já existe uma conta com esse e-mail.');
+    notify('Já existe uma conta com esse e-mail.', 'error');
     return;
   }
 

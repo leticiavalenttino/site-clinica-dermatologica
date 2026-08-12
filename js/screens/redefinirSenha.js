@@ -1,6 +1,7 @@
 import { state } from '../state.js';
 import { redefinirSenhaComToken } from '../models/usuarios.js';
 import { passwordField, wirePasswordToggle } from '../components/passwordField.js';
+import { notify } from '../components/notify.js';
 
 export function renderRedefinirSenha(){
   return `
@@ -32,7 +33,7 @@ export function wireRedefinirSenha(render){
       document.getElementById('rs-confirmar').value
     );
     if(ok){
-      alert('Senha redefinida com sucesso. Faça login com a nova senha.');
+      notify('Senha redefinida com sucesso. Faça login com a nova senha.', 'success');
       state.resetTokenAtivo = null;
       const url = new URL(window.location.href);
       url.searchParams.delete('reset');

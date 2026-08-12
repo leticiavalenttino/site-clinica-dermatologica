@@ -1,5 +1,6 @@
 import { state } from '../state.js';
 import { setData, uid } from '../storage.js';
+import { notify, confirmar } from '../components/notify.js';
 
 export async function registrarMovimentacao(tipo, produtoNome, quantidade){
   state.movimentacoes.push({
@@ -16,11 +17,12 @@ export async function registrarMovimentacao(tipo, produtoNome, quantidade){
 
 export async function removerMovimentacao(id){
   if(state.currentUser.papel !== 'admin'){
-    alert('Somente a administração pode alterar o histórico de movimentações.');
+    notify('Somente a administração pode alterar o histórico de movimentações.', 'error');
     return;
   }
-  const confirmou = confirm('Remover este registro do histórico? Essa ação não pode ser desfeita.');
+  const confirmou = await confirmar('Remover este registro do histórico? Essa ação não pode ser desfeita.');
   if(!confirmou) return;
   state.movimentacoes = state.movimentacoes.filter(m => m.id !== id);
   await setData('movimentacoes', state.movimentacoes);
+  notify('Registro removido.', 'success');
 }

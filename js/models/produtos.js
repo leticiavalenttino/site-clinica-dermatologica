@@ -1,10 +1,11 @@
 import { state } from '../state.js';
 import { setData, uid } from '../storage.js';
 import { registrarMovimentacao } from './movimentacoes.js';
+import { notify, confirmar } from '../components/notify.js';
 
 export async function addProduto(dados){
   if(!dados.nome.trim()){
-    alert('Informe o nome do produto.');
+    notify('Informe o nome do produto.', 'error');
     return;
   }
   const novo = {
@@ -19,6 +20,7 @@ export async function addProduto(dados){
   state.produtos.push(novo);
   await setData('produtos', state.produtos);
   await registrarMovimentacao('Produto cadastrado', novo.nome, novo.estoque);
+  notify('Produto cadastrado com sucesso.', 'success');
 }
 
 export function produtosBaixoEstoque(){
@@ -30,16 +32,17 @@ export async function darBaixaSimples(produtoId, quantidade){
   if(!p) return;
   const q = Number(quantidade);
   if(!q || q <= 0){
-    alert('Informe uma quantidade válida.');
+    notify('Informe uma quantidade válida.', 'error');
     return;
   }
   if(q > p.estoque){
-    alert('Quantidade maior que o estoque disponível.');
+    notify('Quantidade maior que o estoque disponível.', 'error');
     return;
   }
   p.estoque -= q;
   await setData('produtos', state.produtos);
   await registrarMovimentacao('Saída (uso)', p.nome, q);
+  notify('Saída registrada.', 'success');
 }
 
 export async function adicionarEntrada(produtoId, quantidade){
@@ -47,12 +50,13 @@ export async function adicionarEntrada(produtoId, quantidade){
   if(!p) return;
   const q = Number(quantidade);
   if(!q || q <= 0){
-    alert('Informe uma quantidade válida.');
+    notify('Informe uma quantidade válida.', 'error');
     return;
   }
   p.estoque += q;
   await setData('produtos', state.produtos);
   await registrarMovimentacao('Entrada', p.nome, q);
+  notify('Entrada registrada.', 'success');
 }
 
 export function abrirConfirmacaoEspecial(produtoId, quantidade){
@@ -60,35 +64,36 @@ export function abrirConfirmacaoEspecial(produtoId, quantidade){
   if(!p) return;
   const q = Number(quantidade);
   if(!q || q <= 0){
-    alert('Informe uma quantidade válida.');
+    notify('Informe uma quantidade válida.', 'error');
     return;
   }
   if(q > p.estoque){
-    alert('Quantidade maior que o estoque disponível.');
+    notify('Quantidade maior que o estoque disponível.', 'error');
     return;
   }
   state.confirmModal = { produtoId, quantidade: q };
 }
 
-export async function confirmarCompraEspecial(RQEDigitado){
+export async function confirmarCompraEspecial(senhaDigitada){
   const p = state.produtos.find(x => x.id === state.confirmModal.produtoId);
   if(!p){ state.confirmModal = null; return; }
 
   if(state.currentUser.papel !== 'dermatologista'){
-    alert('Somente a dermatologista pode aprovar produtos especiais.');
+    notify('Somente a dermatologista pode aprovar produtos especiais.', 'error');
     state.confirmModal = null;
     return;
   }
 
-  if(RQEDigitado.trim() !== state.currentUser.RQE){
-    alert('RQE não corresponde ao cadastrado. Compra não autorizada.');
+  if(senhaDigitada !== state.currentUser.senha){
+    notify('Senha incorreta. Retirada não autorizada.', 'error');
     return;
   }
 
   p.estoque -= state.confirmModal.quantidade;
   await setData('produtos', state.produtos);
-  await registrarMovimentacao('Saída (RQE)', p.nome, state.confirmModal.quantidade);
+  await registrarMovimentacao('Saída (aprovada)', p.nome, state.confirmModal.quantidade);
   state.confirmModal = null;
+  notify('Retirada aprovada.', 'success');
 }
 
 export function cancelarConfirmacao(){
@@ -97,17 +102,18 @@ export function cancelarConfirmacao(){
 
 export async function removeProduto(id){
   if(state.currentUser.papel !== 'admin'){
-    alert('Somente a administração pode remover produtos.');
+    notify('Somente a administração pode remover produtos.', 'error');
     return;
   }
 
   const alvo = state.produtos.find(p => p.id === id);
   if(!alvo) return;
 
-  const confirmou = confirm(`Remover o produto "${alvo.nome}"? Essa ação não pode ser desfeita.`);
+  const confirmou = await confirmar(`Remover o produto "${alvo.nome}"? Essa ação não pode ser desfeita.`);
   if(!confirmou) return;
 
   state.produtos = state.produtos.filter(p => p.id !== id);
   await setData('produtos', state.produtos);
   await registrarMovimentacao('Produto removido', alvo.nome, alvo.estoque);
+  notify('Produto removido.', 'success');
 }
