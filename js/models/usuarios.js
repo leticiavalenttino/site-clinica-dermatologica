@@ -1,6 +1,8 @@
 import { state } from '../state.js';
 import { setData, uid } from '../storage.js';
 import { notify, confirmar } from '../components/notify.js';
+import { ehMedica } from './permissoes.js';
+import { registrarAcesso } from './movimentacoes.js';
 
 export function attemptLogin(identificador, senha){
   const ident = identificador.trim().toLowerCase();
@@ -15,7 +17,13 @@ export function attemptLogin(identificador, senha){
   state.loginError = '';
   state.currentUser = u;
   state.activeTab = 'dashboard';
+  // cada login recomeça com as tabelas de movimentação minimizadas e o filtro
+  // do caixa na especialidade de quem entrou
+  state.paineisMovAbertos = [];
+  state.filtroEspecialidadeCaixa = null;
   setData('sessaoUsuarioId', u.id);
+  // já vale state.currentUser = u, então o acesso fica registrado no nome de quem entrou
+  registrarAcesso('Login', 'Entrou no sistema');
 }
 
 export async function addUsuario(usuario, senha, papel, RQE){
@@ -27,8 +35,8 @@ export async function addUsuario(usuario, senha, papel, RQE){
     notify('Já existe um usuário com esse nome.', 'error');
     return;
   }
-  if(papel === 'dermatologista' && !RQE.trim()){
-    notify('Informe o RQE da dermatologista.', 'error');
+  if(ehMedica(papel) && !RQE.trim()){
+    notify('Informe o RQE da médica.', 'error');
     return;
   }
   const novo = {
@@ -36,12 +44,13 @@ export async function addUsuario(usuario, senha, papel, RQE){
     usuario: usuario.trim(),
     senha,
     papel,
-    RQE: papel === 'dermatologista' ? RQE.trim() : undefined,
+    RQE: ehMedica(papel) ? RQE.trim() : undefined,
     email: '',
     precisaConfigurar: true
   };
   state.usuarios.push(novo);
   await setData('usuarios', state.usuarios);
+  await registrarAcesso('Usuário cadastrado', `Novo usuário: "${novo.usuario}" · Papel: ${novo.papel}`);
   notify('Usuário cadastrado com sucesso.', 'success');
 }
 
@@ -80,6 +89,23 @@ export async function atualizarNomeUsuario(novoNome){
   state.currentUser = state.usuarios[idx];
   await setData('usuarios', state.usuarios);
   notify('Nome atualizado com sucesso.', 'success');
+}
+
+export async function atualizarEmailUsuario(novoEmail){
+  const email = novoEmail.trim();
+  if(email && (!email.includes('@') || !email.includes('.'))){
+    notify('Informe um e-mail válido.', 'error');
+    return;
+  }
+
+  const jaExiste = email && state.usuarios.some(u => u.id !== state.currentUser.id && u.email && u.email.toLowerCase() === email.toLowerCase());
+  if(jaExiste) return notify('Já existe uma conta com esse e-mail.', 'error');
+
+  const idx = state.usuarios.findIndex(u => u.id === state.currentUser.id);
+  state.usuarios[idx] = { ...state.usuarios[idx], email };
+  state.currentUser = state.usuarios[idx];
+  await setData('usuarios', state.usuarios);
+  notify('E-mail atualizado com sucesso.', 'success');
 }
 
 export async function alterarSenha(senhaAtual, novaSenha, confirmarSenha){

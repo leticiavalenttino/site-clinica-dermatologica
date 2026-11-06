@@ -1,5 +1,6 @@
 import { state } from '../state.js';
 import { addUsuario, removeUsuario } from '../models/usuarios.js';
+import { capitalizar } from './shell.js';
 
 export function renderUsuarios(){
   return `
@@ -14,7 +15,7 @@ export function renderUsuarios(){
               <tr>
                 <td>${u.usuario}</td>
                 <td>${u.email || '<em>pendente</em>'}</td>
-                <td>${u.papel}</td>
+                <td>${capitalizar(u.papel)}</td>
                 <td>${u.RQE || '—'}</td>
                 <td><button class="btn btn-danger" data-remove-user="${u.id}">Remover</button></td>
               </tr>
@@ -33,6 +34,7 @@ export function renderUsuarios(){
           <select id="nu-papel">
             <option value="recepcionista">Recepcionista</option>
             <option value="dermatologista">Dermatologista</option>
+            <option value="ginecologista">Ginecologista</option>
             <option value="admin">Administração</option>
           </select>
         </div>
@@ -51,7 +53,7 @@ export function wireUsuarios(render){
   const RQEField = document.getElementById('nu-RQE-field');
 
   papelSel.addEventListener('change', ()=>{
-    RQEField.style.display = papelSel.value === 'dermatologista' ? 'block' : 'none';
+    RQEField.style.display = (papelSel.value === 'dermatologista' || papelSel.value === 'ginecologista') ? 'block' : 'none';
   });
 
   document.getElementById('form-usuario').addEventListener('submit', async (e)=>{

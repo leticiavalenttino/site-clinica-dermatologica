@@ -1,5 +1,6 @@
 import { state } from '../state.js';
 import { completarPerfil } from '../models/usuarios.js';
+import { passwordField, wirePasswordToggle } from '../components/passwordField.js';
 
 export function renderConfigurarPerfil(){
   return `
@@ -12,7 +13,7 @@ export function renderConfigurarPerfil(){
         <form id="form-configurar-perfil">
           <div class="field"><label>Nome de usuário</label><input id="cp-usuario" type="text" value="${state.currentUser.usuario}" required></div>
           <div class="field"><label>E-mail</label><input id="cp-email" type="email" required></div>
-          <div class="field"><label>Nova senha</label><input id="cp-senha" type="password" required></div>
+          ${passwordField('cp-senha', 'Nova senha')}
           <button type="submit" class="btn btn-primary">Salvar e entrar</button>
         </form>
       </div>
@@ -21,6 +22,8 @@ export function renderConfigurarPerfil(){
 }
 
 export function wireConfigurarPerfil(render){
+  wirePasswordToggle('cp-senha');
+
   document.getElementById('form-configurar-perfil').addEventListener('submit', async (e)=>{
     e.preventDefault();
     await completarPerfil({

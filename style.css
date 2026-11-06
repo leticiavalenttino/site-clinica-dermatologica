@@ -1,67 +1,44 @@
 :root{
-  --bg:#F1F5F0;
+  --bg:#FBF3E1;
   --surface:#FFFFFF;
-  --text:#1E2E27;
-  --muted:#5B6B62;
-  --primary:#3F6D57;
-  --primary-dark:#2C4E3E;
-  --alert:#B23A2C;
-  --alert-bg:#FBEAE7;
-  --border:#DCE6DF;
-  --vibrant:#2E9E6B;
-  --warning:#D99A3B;
-  --warning-bg:#FCF0DC;
+  --text:#2E2410;
+  --muted:#7A6A45;
+  --primary:#C08A1E;
+  --primary-dark:#7f5b1d;
+  --alert:#a33d31cb;
+  --alert-bg:#f8c6bd;
+  --border:#EAD9AE;
+  --vibrant:#1e744d;
+  --warning:#946723c6;
+  --warning-bg:#fae9cd;
+  --warning-strong:#cf8d37dd;
+  --warning-banner-bg:#f7d59266;
+  --warning-banner-border:#d99a2b80;
+  --stripe:#F1F0ED;
 }
 *{box-sizing:border-box;}
+/* Jost (variável 100–900, com itálico) é a única fonte do site.
+   Títulos ficam no peso 400 por padrão, em vez do negrito automático do
+   navegador: na Jost o negrito fica pesado demais. */
+h1, h2, h3, h4, h5, h6{
+  font-weight:400;
+}
+button, input, select, textarea{
+  font-family:inherit;
+}
 html, body{height:100%;}
 body{
   margin:0;
   color:var(--text);
-  font-family:sans-serif;
-  background:linear-gradient(-45deg, #DCEAE1, #F3E6EC, #E7F0DE, #E9E3F2);
+  font-family:'Jost', sans-serif;
+  background:linear-gradient(-45deg, #F7E7B0, #FFF6DC, #e4d1ac, #FFFDF0);
   background-size:400% 400%;
-  animation:fluidBg 12s ease infinite;
+  animation:fluidBg 20s ease infinite;
 }
 @keyframes fluidBg{
   0%{background-position:0% 50%;}
   50%{background-position:100% 50%;}
   100%{background-position:0% 50%;}
-}
-.bg-lines{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
-.bg-lines svg{width:100%;height:100%;}
-.bg-lines .line{
-  fill:none;
-  stroke:#fff;
-  stroke-width:16;
-  opacity:0.10;
-  stroke-linecap:round;
-}
-.line1{animation:drift1 14s ease-in-out infinite;}
-.line2{animation:drift2 17s ease-in-out infinite;}
-.line3{animation:drift3 20s ease-in-out infinite;}
-.line4{animation:drift1 15s ease-in-out infinite;}
-.line5{animation:drift2 18s ease-in-out infinite;}
-.line6{animation:drift2 18s ease-in-out infinite;}
-.line7{animation:drift3 15s ease-in-out infinite;}
-
-.bg-lines .line1{ stroke-width:60; opacity:0.06; }
-.bg-lines .line2{ stroke-width:46; opacity:0.09; }
-.bg-lines .line3{ stroke-width:52; opacity:0.13; }
-.bg-lines .line4{ stroke-width:40; opacity:0.08; }
-.bg-lines .line5{ stroke-width:50; opacity:0.11; }
-.bg-lines .line6{ stroke-width:44; opacity:0.09; }
-.bg-lines .line7{ stroke-width:64; opacity:0.07; }
-@keyframes drift1{
-  0%,100%{transform:translate(0,0);}
-  50%{transform:translate(70px,-35px);}
-}
-@keyframes drift2{
-  0%,100%{transform:translate(0,0);}
-  50%{transform:translate(-60px,45px);}
-}
-@keyframes drift3{
-  0%,100%{transform:translate(0,0);}
-  50%{transform:translate(50px,35px);}
 }
 
 #app{position:relative;z-index:1;}
@@ -74,8 +51,10 @@ body{
   border-radius:20px;
   padding:48px 56px;
   width:720px;
-  max-width:92vw;
-  box-shadow:0 24px 60px -24px rgba(30,46,39,0.28);
+  /* limitado pelo próprio painel, não pela janela: com 92vw o cartão
+     esmagava o lado da marca e cortava o "CITODERME" em telas médias */
+  max-width:100%;
+  box-shadow:0 24px 60px -24px rgba(46, 42, 30, 0.28);
 }
 
 .login-split{
@@ -88,32 +67,72 @@ body{
   flex:1 1 42%;
   position:relative;
   overflow:hidden;
-  background:var(--primary-dark);
+  background:linear-gradient(160deg, #241708 0%, #2e1e0c 45%, #8d6937 100%);
   display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:48px;
+  padding:56px;
+}
+/* Ponto de luz. A caixa precisa ser quadrada e o degradê precisa chegar a
+   transparente na borda dela (closest-side): num retângulo, o círculo é
+   medido pelo canto mais distante e ainda estava visível quando a caixa
+   acabava — aparecia um corte reto na vertical. */
+.login-brand::before{
+  content:'';
+  position:absolute;
+  top:-22%;
+  right:-22%;
+  width:85%;
+  aspect-ratio:1;
+  background:radial-gradient(circle closest-side, rgba(192,138,30,0.55) 0%, rgba(192,138,30,0) 100%);
+  pointer-events:none;
 }
 .login-brand-content{
   position:relative;
   z-index:1;
-  text-align:center;
   color:#fff;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
 }
-.login-brand-content h1{
-  font-size:clamp(2rem, 4vw, 2.8rem);
-  margin:0 0 10px;
-  line-height:1.15;
-}
-.login-brand-content p{
-  margin:0;
-  font-size:0.95rem;
+.login-brand-eyebrow{
+  font-size:0.78rem;
   letter-spacing:0.14em;
   text-transform:uppercase;
-  opacity:0.75;
+  color:rgba(255,255,255,0.7);
+  font-weight:500;
+}
+/* traço fino e letras soltas, como as letras douradas da fachada da clínica */
+.login-brand-title{
+  font-size:clamp(2.6rem, 5vw, 4.5rem);
+  font-weight:200;
+  letter-spacing:0.06em;
+  margin:0 0 16px;
+  line-height:1.1;
+}
+.login-brand-subtitle{
+  margin:0;
+  font-size:1rem;
+  line-height:1.5;
+  color:rgba(255,255,255,0.75);
+  max-width:340px;
+}
+.login-brand-footer{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:0.85rem;
+  color:rgba(255,255,255,0.6);
+}
+.login-brand-footer-line{
+  width:28px;
+  height:1px;
+  background:rgba(255,255,255,0.4);
 }
 .login-form-panel{
   flex:1 1 58%;
+  /* sem isso o painel não encolhe abaixo da largura do cartão e empurra
+     o lado da marca até cortar o "CITODERME" */
+  min-width:0;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -144,10 +163,6 @@ body{
   white-space:nowrap;
   color:var(--primary-dark);
 }
-.brand-title,
-.main h1{
-  font-family:'Playfair Display', serif;
-}
 .link-btn{
   display:block;
   margin:16px auto 0;
@@ -161,7 +176,77 @@ body{
 }
 .field{margin-bottom:20px;}
 .field label{display:block;font-size:0.9rem;margin-bottom:7px;color:var(--muted);}
+.required-asterisk{color:var(--alert);}
 .field input:not([type="checkbox"]), .field select{width:100%;padding:14px 16px;font-size:1rem;border-radius:10px;border:1px solid var(--border);}
+.field select{
+  appearance:none;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  padding-right:44px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%237A6A45' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 16px center;
+  background-size:12px 8px;
+}
+
+/* A lista aberta do <select> é desenhada pelo navegador, e o realce azul dele
+   não é alcançável por CSS comum. Com "base-select" a lista passa a ser parte
+   da página e aceita as cores do projeto. Onde o navegador não suportar, tudo
+   continua como antes — só o realce segue sendo o azul padrão. */
+@supports (appearance: base-select){
+  .field select{
+    appearance:base-select;
+  }
+  /* já desenhamos a seta como background-image */
+  .field select::picker-icon{display:none;}
+
+  .field select::picker(select){
+    appearance:base-select;
+    margin-top:6px;
+    padding:6px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    box-shadow:0 18px 40px -18px rgba(46, 42, 30, 0.35);
+  }
+  .field select option{
+    padding:10px 14px;
+    border-radius:8px;
+    color:var(--text);
+    background:transparent;
+  }
+  .field select option::checkmark{display:none;}
+  .field select option:checked{
+    background:var(--primary);
+    color:#fff;
+  }
+  .field select option:hover{
+    background:var(--warning-banner-bg);
+    color:var(--text);
+  }
+  /* o navegador foca a primeira opção assim que a lista abre; se o foco
+     pintasse o fundo, duas linhas apareceriam realçadas ao mesmo tempo.
+     Por isso o teclado usa contorno e só o mouse pinta. */
+  .field select option:focus-visible{
+    outline:2px solid var(--primary);
+    outline-offset:-2px;
+  }
+  /* a lista aberta deixava o campo cinza */
+  .field select:open{
+    background-color:var(--surface);
+  }
+  .field select option:disabled{
+    color:var(--muted);
+    background:transparent;
+  }
+}
+
+input[type="number"]{-moz-appearance:textfield;}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button{
+  -webkit-appearance:none;
+  margin:0;
+}
 
 .field-checkbox label{
   display:flex;
@@ -199,8 +284,9 @@ body{
 .password-toggle.is-visible .icon-eye{display:none;}
 .password-toggle.is-visible .icon-eye-off{display:block;}
 .btn{padding:15px 30px;border:1px solid var(--border);border-radius:30px;cursor:pointer;font-weight:700;font-size:1rem;background:var(--surface);color:var(--text);position:relative;overflow:hidden;transition:all 0.4s ease;outline:none;}
-.btn-primary{background:var(--primary);color:#fff;border:none;}
+.btn-primary{background:var(--primary);color:#e94d4d7d;border:1px solid var(--border);border-radius:30px;cursor:pointer;font-weight:700;font-size:1rem;background:var(--surface);color:var(--text);position:relative;overflow:hidden;transition:all 0.4s ease;outline:none;};
 .btn-icon{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;}
+.btn-registrar-mov{background:#ebc66f69;}
 .btn-danger{background:var(--alert-bg);color:var(--alert);border:none;}
 .login-card .btn{width:100%;}
 #btn-voltar-login{margin-top:12px;}
@@ -233,7 +319,7 @@ body{
 
 /* depois do login */
 .shell{display:flex;min-height:100vh;}
-.sidebar{width:220px;background:var(--primary-dark);color:#fff;padding:24px;position:relative;}
+.sidebar{width:220px;flex-shrink:0;background:var(--primary-dark);color:#fff;padding:24px;position:relative;}
 .sidebar h3{font-size:1rem;line-height:1.3;margin-top:48px;}
 .sidebar h2{font-size:1.4rem;line-height:1.3;margin-top:64px;}
 .sidebar nav{display:flex;flex-direction:column;gap:14px;margin:20px 0;}
@@ -262,13 +348,42 @@ body{
 .sidebar-user-btn:hover{
   opacity:0.85;
 }
+.sidebar {
+  background: radial-gradient(
+    circle at top right,
+    #8a6a2f 0%,
+    #76540f 35%,
+    #55320b 70%,
+    #472907 100%
+  );
+}
 .sidebar-user-row #btn-logout{
   width:auto;
   padding:6px 12px;
   font-size:0.85rem;
 }
 .sidebar #btn-logout{display:block;width:100%;text-align:left;background:none;border:none;color:#fff;padding:10px;cursor:pointer;border-radius:30px;position:relative;overflow:hidden;transition:all 0.4s ease;}
-.main{flex:1;padding:30px;}
+.main{flex:1;min-width:0;padding:30px;}
+.main h1{
+  display:inline-block;
+  font-size:2rem;
+  font-weight:500;
+  letter-spacing:-0.01em;
+  color:var(--primary-dark);
+  margin:0 0 20px;
+  padding-bottom:10px;
+  position:relative;
+}
+.main h1::after{
+  content:'';
+  position:absolute;
+  left:0;
+  bottom:0;
+  width:56px;
+  height:4px;
+  border-radius:3px;
+  background:var(--primary);
+}
 .sidebar{transition:width 0.3s ease;}
 
 .sidebar-toggle{
@@ -330,22 +445,237 @@ body{
 }
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-top:16px;}
 
+/* Painéis que abrem e fecham (tela de movimentação). O cabeçalho inteiro é o
+   botão, com a contagem à direita para dar para escolher o que abrir sem
+   precisar abrir tudo. */
+.panel-colapsavel{padding:0;}
+.panel-summary{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:18px 22px;
+  cursor:pointer;
+  border-radius:12px;
+  list-style:none;
+  -webkit-user-select:none;
+  user-select:none;
+}
+.panel-summary::-webkit-details-marker{display:none;}
+.panel-summary:hover{background:var(--bg);}
+.panel-summary:focus-visible{outline:2px solid var(--primary-dark);outline-offset:-2px;}
+.panel-summary-seta{
+  color:var(--muted);
+  font-size:0.95rem;
+  line-height:1;
+  transition:transform 0.18s ease;
+}
+.panel-colapsavel[open] .panel-summary-seta{transform:rotate(90deg);}
+.panel-summary-titulo{font-size:1.5rem;line-height:1.2;}
+.panel-summary-contagem{
+  margin-left:auto;
+  flex-shrink:0;
+  font-size:0.78rem;
+  font-weight:700;
+  color:var(--muted);
+  background:var(--bg);
+  border-radius:999px;
+  padding:3px 10px;
+}
+.panel-colapsavel[open] .panel-summary{
+  border-bottom:1px solid var(--border);
+  border-radius:12px 12px 0 0;
+}
+.panel-corpo{padding:16px 22px 22px;}
+.panel-corpo > p:first-child{margin-top:0;}
+
 table{width:100%;border-collapse:collapse;}
 th,td{text-align:left;padding:8px;border-bottom:1px solid var(--border);}
 tbody tr{transition:background 0.15s ease;}
-tbody tr:nth-child(even){background:var(--bg);}
-tbody tr:hover{background:rgba(63,109,87,0.12);}
+tbody tr:nth-child(even){background:var(--stripe);}
+tbody tr:hover{background:rgba(109, 100, 63, 0.12);}
+tbody tr.linha-vencida{background:rgba(163, 61, 49, 0.12);}
+tbody tr.linha-vencida:hover{background:rgba(163, 61, 49, 0.2);}
+.validade-vencida{color:var(--alert);}
+.validade-vencida strong{font-size:0.7rem;letter-spacing:0.02em;}
 
-.tabela-mov{table-layout:fixed;}
-.tabela-mov td{word-break:break-word;}
-.tabela-mov th:last-child,
-.tabela-mov td:last-child{
-  width:90px;
+.table-scroll{overflow-x:auto;}
+/* valores atômicos — lote, data, dinheiro — não podem quebrar no meio
+   ("L123-" / "33" ou "R$" / "45,90") */
+.nao-quebra{white-space:nowrap;}
+.td-acoes{white-space:nowrap;}
+/* botão dentro de tabela é compacto: no tamanho padrão a coluna de ações
+   engolia o espaço das outras e os nomes quebravam em várias linhas */
+.td-acoes .btn{
+  margin-right:8px;
+  padding:8px 12px;
+  font-size:0.85rem;
+  white-space:nowrap;
 }
+.td-acoes .btn:last-child{margin-right:0;}
+/* No catálogo, a sobra de largura fica toda na última coluna: as colunas de
+   dados ficam coladas no próprio conteúdo (sem vão entre Produto e Lote) e os
+   botões se esticam para ocupar essa sobra, sem deixar vazio no fim da linha. */
+.tabela-catalogo th:last-child,
+.tabela-catalogo td:last-child{
+  width:100%;
+}
+.tabela-catalogo .acoes-linha{
+  display:flex;
+  gap:8px;
+}
+.tabela-catalogo .acoes-linha .btn{
+  /* cresce a partir da largura natural, para o botão principal continuar
+     maior que o "Remover" em vez de todos ficarem do mesmo tamanho */
+  flex:1 1 auto;
+  margin-right:0;
+}
+/* Tabelas de movimentação.
+   As larguras são percentuais para que as colunas acompanhem o tamanho do
+   painel e fiquem sempre alinhadas entre tabelas com as mesmas colunas.
+   O min-width garante que nenhuma coluna fique menor que o seu conteúdo:
+   abaixo dele a tabela rola na horizontal dentro do próprio painel.
+   Colunas de valor curto nunca quebram; só os textos livres (Produto,
+   Descrição, O que mudou) ocupam várias linhas. */
+.tabela-mov{table-layout:fixed;width:100%;min-width:900px;}
+.tabela-mov td{word-break:break-word;}
+.tabela-mov td.col-data,
+.tabela-mov td.col-usuario,
+.tabela-mov td.col-papel,
+.tabela-mov td.col-compacto,
+.tabela-mov td.col-acoes{
+  white-space:nowrap;
+}
+
+/* Transferências e Saídas: Produto ocupa a largura restante. */
+.tabela-mov .col-data{width:13%;}
+.tabela-mov .col-usuario{width:12%;}
+.tabela-mov .col-papel{width:16%;}
+.tabela-mov .col-compacto{width:11%;}
+.tabela-mov .col-acoes{width:13%;}
+
+/* Entradas: 11 colunas. Cada uma recebe só a largura que o seu conteúdo pede,
+   para a tabela caber no painel sem rolagem em telas normais. */
+.tabela-mov-completa{min-width:1060px;}
+.tabela-mov-completa .col-data{width:10%;}
+.tabela-mov-completa .col-usuario{width:7.5%;}
+.tabela-mov-completa .col-papel{width:13%;}
+.tabela-mov-completa .col-tipo{width:7.5%;}
+.tabela-mov-completa .col-lote{width:5.5%;}
+.tabela-mov-completa .col-validade{width:10%;}
+.tabela-mov-completa .col-valor{width:9.5%;}
+.tabela-mov-completa .col-estoque{width:8%;}
+.tabela-mov-completa .col-qtd{width:5%;}
+.tabela-mov-completa .col-acoes{width:10%;}
+
+/* Alterações de cadastro: "O que mudou" fica com o espaço restante. */
+.tabela-mov-edicoes .col-data{width:12%;}
+.tabela-mov-edicoes .col-usuario{width:9%;}
+.tabela-mov-edicoes .col-papel{width:15%;}
+.tabela-mov-edicoes .col-produto{width:16%;}
 .tabela-mov .btn{
   white-space:nowrap;
   padding:8px 12px;
   font-size:0.85rem;
+}
+
+/* caixa */
+.panel-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.panel-header h2{margin:0;}
+.texto-fraco{color:var(--muted);font-size:0.9rem;}
+.campo-ajuda{color:var(--muted);font-size:0.82rem;margin:8px 0 0;min-height:1em;}
+.valor-positivo{color:var(--vibrant);}
+.valor-negativo{color:var(--alert);}
+
+.stat-tile .stat-tile-suffix{display:block;margin-top:6px;}
+.stat-tile-number.stat-dinheiro{font-size:1.45rem;}
+
+.form-procedimento{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:22px;
+  margin:16px 0 24px;
+}
+.form-procedimento h3{margin-top:0;}
+.form-linha{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0 20px;
+}
+.form-linha-3{grid-template-columns:2fr 1fr 1fr;}
+.form-atendimento{
+  grid-template-columns:1fr 1fr auto;
+  align-items:end;
+  gap:0 16px;
+  margin:16px 0 20px;
+}
+.form-atendimento .btn{margin-bottom:20px;white-space:nowrap;}
+.form-custo-previa{
+  color:var(--muted);
+  font-size:0.95rem;
+  margin:0 0 20px;
+}
+.form-procedimento .chip-input-row select{flex:1;width:auto;}
+.form-procedimento .chip-input-row input{flex:0 0 90px;width:90px;}
+.form-procedimento .chip-input-row .btn{
+  flex-shrink:0;
+  white-space:nowrap;
+  padding:12px 20px;
+  font-size:0.9rem;
+}
+
+.tabela-caixa{width:100%;}
+.tabela-caixa .col-data{white-space:nowrap;width:1%;}
+.tabela-caixa .col-dinheiro{text-align:right;white-space:nowrap;}
+.tabela-caixa .col-acoes-caixa{width:1%;white-space:nowrap;text-align:right;}
+.tabela-caixa .col-especialidade{width:1%;white-space:nowrap;}
+
+/* Etiqueta de especialidade do procedimento. Tons próprios, de propósito: não
+   é status (crítico/atenção/ok), é só de que área o procedimento é. */
+.badge-esp{
+  display:inline-block;
+  font-size:0.72rem;
+  font-weight:700;
+  letter-spacing:0.02em;
+  border-radius:999px;
+  padding:3px 10px;
+  border:1px solid transparent;
+  white-space:nowrap;
+}
+.badge-esp.dermatologia{background:#EDE3F2;color:#6A4C7C;}
+.badge-esp.ginecologia{background:#F8E1E7;color:#8C4258;}
+.badge-esp.ambas{background:var(--bg);color:var(--muted);border-color:var(--border);}
+
+.filtro-especialidade{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:0 0 14px;
+}
+.btn-filtro{padding:7px 16px;font-size:0.82rem;font-weight:600;border-radius:999px;}
+.btn-filtro.ativo{background:var(--primary-dark);color:#fff;border-color:var(--primary-dark);}
+.tabela-caixa tfoot td{
+  border-top:2px solid var(--border);
+  border-bottom:none;
+  font-size:1.05rem;
+}
+.tabela-caixa .btn{
+  white-space:nowrap;
+  padding:8px 12px;
+  font-size:0.85rem;
+}
+
+@media (max-width:900px){
+  .form-linha,
+  .form-atendimento{grid-template-columns:1fr;}
+  .form-atendimento .btn{margin-bottom:0;}
 }
 
 .paciente-cards{
@@ -414,6 +744,35 @@ tbody tr:hover{background:rgba(63,109,87,0.12);}
   }
 }
 
+.produto-detalhe-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:24px 40px;
+  margin:28px 0;
+}
+.produto-detalhe-item{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.produto-detalhe-item.full{
+  grid-column:1 / -1;
+}
+.produto-detalhe-item .label{
+  font-size:0.8rem;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+}
+.produto-detalhe-item .valor{
+  font-size:1.1rem;
+}
+@media (max-width: 700px){
+  .produto-detalhe-grid{
+    grid-template-columns:1fr;
+  }
+}
+
 .chip-input-row{
   display:flex;
   gap:8px;
@@ -478,48 +837,216 @@ tbody tr:hover{background:rgba(63,109,87,0.12);}
   }
 }
 
-.alert-banner{background:var(--alert-bg);color:var(--alert);border:1px solid #E9BDB4;border-radius:10px;padding:12px 16px;margin:16px 0;font-size:0.9rem;}
-.alert-ok{background:#DCEAE1;color:var(--primary-dark);border-radius:10px;padding:10px 16px;margin:16px 0;font-size:0.85rem;}
-.nome-baixo{color:var(--alert);font-weight:700;}
+.alert-banner{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  background:var(--alert-bg);
+  color:var(--alert);
+  border:1px solid #E9BDB4;
+  border-radius:10px;
+  padding:12px 16px;
+  margin:16px 0;
+  font-size:0.9rem;
+}
+.alert-banner-icon{
+  flex-shrink:0;
+  line-height:1.4;
+}
+.alert-banner-link{
+  color:var(--alert);
+  font-weight:700;
+  text-decoration:underline;
+  cursor:pointer;
+}
+.alert-banner-link:hover{
+  opacity:0.75;
+}
+.alert-banner-warning{
+  background:var(--warning-banner-bg);
+  color:var(--warning);
+  border-color:var(--warning-banner-border);
+}
+.alert-banner-warning .alert-banner-link{
+  color:var(--warning);
+}
+.alert-banner-critico{
+  border-width:2px;
+  border-color:var(--alert);
+}
+.alert-ok{background:#DCEAE1;color:var(--primary-dark);border:1px solid var(--vibrant);border-radius:10px;padding:10px 16px;margin:16px 0;font-size:0.85rem;}
+.nome-baixo{color:var(--text);font-weight:700;}
+.nome-baixo::before{content:'⚠ ';color:var(--alert);}
+.nome-clicavel{cursor:pointer;}
+.nome-clicavel:hover{text-decoration:underline;color:var(--primary-dark);}
+.clinica-baixa{color:var(--warning);font-weight:700;}
+
+@keyframes destaqueProduto{
+  0%, 30%{ box-shadow:0 0 0 4px rgba(178,58,44,0.45); }
+  100%{ box-shadow:0 0 0 4px rgba(178,58,44,0); }
+}
+.destaque-produto{
+  animation:destaqueProduto 1.6s ease;
+}
+tbody tr.destaque-produto{
+  animation:none;
+  background:rgba(178,58,44,0.35) !important;
+}
+
+.stats-row{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:16px;
+  margin-top:20px;
+}
+.stat-tile{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:20px;
+}
+.stat-tile-label{
+  display:block;
+  font-size:0.72rem;
+  font-weight:700;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:12px;
+}
+.stat-tile-value{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+}
+.stat-tile-number{
+  font-size:1.9rem;
+  font-weight:800;
+  line-height:1;
+}
+.stat-tile-number.stat-alerta{
+  color:var(--warning-strong);
+}
+.stat-tile-suffix{
+  font-size:0.85rem;
+  color:var(--muted);
+}
 
 .estoque-cards{
   display:grid;
   grid-template-columns:repeat(4, 1fr);
-  gap:20px;
-  margin-top:20px;
+  gap:16px;
+  margin-top:16px;
 }
 .estoque-card{
-  min-height:220px;
-  border-radius:24px;
-  padding:20px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:22px;
+  min-height:230px;
   display:flex;
   flex-direction:column;
+  gap:10px;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+.estoque-card:hover{
+  border-color:var(--primary);
+  transform:translateY(-2px);
+}
+.estoque-card.vencido{
+  border:2px solid var(--alert);
+}
+.estoque-card.vencido:hover{
+  border-color:var(--alert);
+}
+.estoque-card-top{
+  display:flex;
   justify-content:space-between;
+  align-items:flex-start;
   gap:8px;
-  border:2px solid transparent;
 }
 .estoque-card strong{
-  font-size:1.15rem;
-  line-height:1.2;
+  font-size:1.05rem;
+  line-height:1.25;
 }
-.estoque-card-desc{
+.estoque-badge{
+  flex-shrink:0;
+  font-size:0.68rem;
+  font-weight:700;
+  letter-spacing:0.03em;
+  padding:4px 10px;
+  border-radius:20px;
+  white-space:nowrap;
+}
+.estoque-badge.critico{ background:var(--alert-bg); color:var(--alert); }
+.estoque-badge.atencao{ background:var(--warning-bg); color:var(--warning); }
+.estoque-badge.ok{ background:#DCEAE1; color:var(--vibrant); }
+.estoque-badge.vencido{ background:var(--alert); color:#fff; }
+.estoque-card-desc,
+.estoque-card-secundario{
   margin:0;
-  font-size:0.9rem;
-  opacity:0.85;
-  flex:1;
+  font-size:0.85rem;
+  color:var(--muted);
 }
-.estoque-card span{
-  font-size:0.9rem;
-  opacity:0.85;
+.estoque-card-secundario.baixo{
+  color:var(--alert);
+  font-weight:700;
 }
-.estoque-card-info{
+.estoque-card-lote{
+  display:inline-block;
+  width:fit-content;
+  font-size:0.72rem;
+  font-weight:700;
+  letter-spacing:0.02em;
+  color:var(--primary-dark);
+  background:var(--bg);
+  border-radius:6px;
+  padding:2px 8px;
+}
+.estoque-card-lote.atencao{ background:var(--warning-bg); color:var(--warning); }
+.estoque-card-lote.critico{ background:var(--alert-bg); color:var(--alert); }
+.estoque-card-bottom{
+  margin-top:auto;
   display:flex;
   flex-direction:column;
-  gap:2px;
+  gap:8px;
 }
-.estoque-card.critico{ background:rgba(178, 58, 44, 0.19); border-color:var(--alert); color:var(--alert); }
-.estoque-card.atencao{ background:rgba(217, 154, 59, 0.18); border-color:var(--warning); color:var(--warning); }
-.estoque-card.ok{ background:rgba(63, 109, 87, 0.18); border-color:var(--primary); color:var(--primary-dark); }
+.estoque-card-hint{
+  display:block;
+  font-size:0.78rem;
+  color:var(--muted);
+}
+.estoque-card-numero{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+}
+.numero-grande{
+  font-size:1.7rem;
+  font-weight:800;
+  line-height:1;
+}
+.numero-grande.critico{ color:var(--alert); }
+.numero-grande.atencao{ color:var(--warning-strong); }
+.numero-grande.ok{ color:var(--vibrant); }
+.numero-legenda{
+  font-size:0.8rem;
+  color:var(--muted);
+}
+.estoque-progress{
+  height:6px;
+  border-radius:4px;
+  background:var(--bg);
+  overflow:hidden;
+}
+.estoque-progress-bar{
+  height:100%;
+  border-radius:4px;
+}
+.estoque-progress-bar.critico{ background:var(--alert); }
+.estoque-progress-bar.atencao{ background:var(--warning-strong); }
+.estoque-progress-bar.ok{ background:var(--vibrant); }
 .modal-backdrop{
   position:fixed; inset:0; background:rgba(0,0,0,0.25);
   backdrop-filter:blur(4px);
@@ -549,9 +1076,84 @@ tbody tr:hover{background:rgba(63,109,87,0.12);}
   margin-top:12px;
 }
 
+.modal-acoes{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:20px;
+  padding-top:12px;
+  position:sticky;
+  bottom:0;
+  background:var(--surface);
+}
+
 .modal.modal-lg{
   width:90%;
   max-width:1280px;
+}
+
+.modal.modal-perfil{
+  width:640px;
+  max-width:90%;
+}
+
+/* Dentro do modal o formulário de procedimento não precisa da própria caixa
+   bege: o modal já é a caixa. A classe continua no <form> porque é dela que
+   vem o layout da linha de produtos. */
+.modal.modal-procedimento{
+  width:900px;
+  max-width:90%;
+}
+.modal .form-procedimento{
+  background:none;
+  border:none;
+  padding:0;
+  margin:0;
+}
+/* Os botões do rodapé ficam dentro do <form> (o submit precisa disso), então
+   escapam à mão da regra que estica botão de formulário em modal. */
+.modal-procedimento .modal-acoes button.btn{
+  width:auto;
+  margin-top:0;
+}
+
+/* O conteúdo do modal rola, então o cabeçalho fica grudado no topo para o X
+   continuar ao alcance em formulários longos. O modal abre mão do próprio
+   padding de cima e quem passa a dá-lo é o cabeçalho: assim ele começa
+   exatamente na borda da área que rola e nada aparece acima dele. */
+.modal:has(.modal-header){
+  padding-top:0;
+}
+.modal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:var(--surface);
+  margin:0 -24px 20px;
+  padding:24px 24px 14px;
+  border-radius:14px 14px 0 0;
+}
+.modal-header h2,
+.modal-header h3{
+  margin:0;
+}
+.modal-close{
+  background:none;
+  border:none;
+  cursor:pointer;
+  color:var(--muted);
+  font-size:1.6rem;
+  line-height:1;
+  padding:4px 8px;
+  border-radius:8px;
+}
+.modal-close:hover{
+  background:var(--alert-bg);
+  color:var(--alert);
 }
 
 .confirm-botoes{
@@ -674,7 +1276,7 @@ tbody tr:hover{background:rgba(63,109,87,0.12);}
   .sidebar-toggle{
     display:none;
   }
-  .estoque-cards{
+  .estoque-cards, .stats-row{
     grid-template-columns:repeat(2, 1fr);
   }
 }
@@ -684,9 +1286,9 @@ tbody tr:hover{background:rgba(63,109,87,0.12);}
     width:50px;
   }
   td .btn{
-    display:block;
-    margin-top:6px;
-    width:100%;
+    padding:8px 14px;
+    font-size:0.85rem;
+    margin:2px 4px 2px 0;
   }
 }
 

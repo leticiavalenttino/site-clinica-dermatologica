@@ -1,6 +1,7 @@
 import { state } from '../state.js';
 import { setData, uid } from '../storage.js';
 import { notify, confirmar } from '../components/notify.js';
+import { ehMedica, podeGerenciarClinica } from './permissoes.js';
 
 export function calcularIdade(dataNascimento){
   const nascimento = new Date(dataNascimento + 'T00:00:00');
@@ -13,7 +14,11 @@ export function calcularIdade(dataNascimento){
 }
 
 export function podeGerenciarPacientes(){
-  return state.currentUser.papel === 'dermatologista' || state.currentUser.papel === 'recepcionista';
+  return ehMedica() || state.currentUser.papel === 'recepcionista';
+}
+
+export function podeRemoverPacientes(){
+  return podeGerenciarClinica();
 }
 
 // cadastros antigos guardavam um único "procedimentoDesejado" em texto
@@ -68,8 +73,8 @@ export async function updatePaciente(id, dados){
 }
 
 export async function removePaciente(id){
-  if(state.currentUser.papel !== 'admin'){
-    notify('Somente a administração pode remover pacientes.', 'error');
+  if(!podeGerenciarClinica()){
+    notify('Somente a dermatologista, a ginecologista ou a administração pode remover pacientes.', 'error');
     return false;
   }
 

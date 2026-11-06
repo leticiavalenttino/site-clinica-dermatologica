@@ -1,42 +1,48 @@
 import { state } from '../state.js';
-import { atualizarNomeUsuario, alterarSenha } from '../models/usuarios.js';
+import { atualizarNomeUsuario, atualizarEmailUsuario, alterarSenha } from '../models/usuarios.js';
+import { passwordField, wirePasswordToggle } from '../components/passwordField.js';
 
 export function renderPerfilModal(){
   return `
     <div class="modal-backdrop" id="backdrop-perfil">
-      <div class="modal">
-        <h3>Meu perfil</h3>
-        <form id="form-perfil-nome">
+      <div class="modal modal-perfil">
+        <div class="modal-header">
+          <h3>Meu perfil</h3>
+          <button type="button" class="modal-close" id="btn-fechar-perfil" aria-label="Fechar">&times;</button>
+        </div>
+        <form id="form-perfil">
           <div class="field"><label>Nome de usuário</label><input id="perfil-usuario" type="text" value="${state.currentUser.usuario}" required></div>
-          <button type="submit" class="btn btn-primary">Salvar nome</button>
+          <div class="field"><label>E-mail</label><input id="perfil-email" type="email" value="${state.currentUser.email || ''}"></div>
+          ${passwordField('perfil-senha-atual', 'Senha atual', { obrigatorio: false })}
+          ${passwordField('perfil-senha-nova', 'Nova senha', { obrigatorio: false })}
+          ${passwordField('perfil-senha-confirmar', 'Confirmar nova senha', { obrigatorio: false })}
+          <button type="submit" class="btn btn-primary">Alterar dados</button>
         </form>
-        <hr style="margin:20px 0;border:none;border-top:1px solid var(--border);">
-        <form id="form-perfil-senha">
-          <div class="field"><label>Senha atual</label><input id="perfil-senha-atual" type="password" required></div>
-          <div class="field"><label>Nova senha</label><input id="perfil-senha-nova" type="password" required></div>
-          <div class="field"><label>Confirmar nova senha</label><input id="perfil-senha-confirmar" type="password" required></div>
-          <button type="submit" class="btn btn-primary">Alterar senha</button>
-        </form>
-        <button type="button" class="btn" id="btn-fechar-perfil" style="margin-top:12px;">Fechar</button>
       </div>
     </div>
   `;
 }
 
 export function wirePerfilModal(render){
-  document.getElementById('form-perfil-nome').addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    await atualizarNomeUsuario(document.getElementById('perfil-usuario').value);
-    render();
-  });
+  ['perfil-senha-atual', 'perfil-senha-nova', 'perfil-senha-confirmar'].forEach(id => wirePasswordToggle(id));
 
-  document.getElementById('form-perfil-senha').addEventListener('submit', async (e)=>{
+  document.getElementById('form-perfil').addEventListener('submit', async (e)=>{
     e.preventDefault();
-    await alterarSenha(
-      document.getElementById('perfil-senha-atual').value,
-      document.getElementById('perfil-senha-nova').value,
-      document.getElementById('perfil-senha-confirmar').value
-    );
+    const usuario = document.getElementById('perfil-usuario').value;
+    const email = document.getElementById('perfil-email').value;
+    const senhaAtual = document.getElementById('perfil-senha-atual').value;
+    const senhaNova = document.getElementById('perfil-senha-nova').value;
+    const senhaConfirmar = document.getElementById('perfil-senha-confirmar').value;
+
+    if(usuario.trim() !== state.currentUser.usuario){
+      await atualizarNomeUsuario(usuario);
+    }
+    if(email.trim() !== (state.currentUser.email || '')){
+      await atualizarEmailUsuario(email);
+    }
+    if(senhaAtual || senhaNova || senhaConfirmar){
+      await alterarSenha(senhaAtual, senhaNova, senhaConfirmar);
+    }
     render();
   });
 

@@ -1,7 +1,7 @@
 import { state } from '../state.js';
 import {
   addPaciente, updatePaciente, removePaciente,
-  calcularIdade, podeGerenciarPacientes, procedimentosDesejadosDe
+  calcularIdade, podeGerenciarPacientes, podeRemoverPacientes, procedimentosDesejadosDe
 } from '../models/pacientes.js';
 
 function formatarData(dataNascimento){
@@ -44,7 +44,10 @@ function renderDetalhePaciente(){
   return `
     <div class="modal-backdrop" id="backdrop-detalhe-paciente">
       <div class="modal modal-lg">
-        <h2>${p.nome}</h2>
+        <div class="modal-header">
+          <h2>${p.nome}</h2>
+          <button type="button" class="modal-close" id="btn-fechar-detalhe-paciente-x" aria-label="Fechar">&times;</button>
+        </div>
         <div class="paciente-detalhe-grid">
           <div class="paciente-detalhe-item"><span class="label">Idade</span><span class="valor">${calcularIdade(p.dataNascimento)} anos</span></div>
           <div class="paciente-detalhe-item"><span class="label">Nascimento</span><span class="valor">${formatarData(p.dataNascimento)}</span></div>
@@ -57,9 +60,9 @@ function renderDetalhePaciente(){
           <div class="paciente-detalhe-item full"><span class="label">Já fez procedimento antes</span><span class="valor">${p.jaFezProcedimento ? `Sim — ${p.procedimentosAnteriores || 'não especificado'}` : 'Não'}</span></div>
           <div class="paciente-detalhe-item full"><span class="label">Procedimento(s) desejado(s)</span><span class="valor">${procedimentosDesejadosDe(p).join(', ') || '-'}</span></div>
         </div>
-        <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
+        <div class="modal-acoes">
           ${podeGerenciarPacientes() ? `<button type="button" class="btn btn-primary" id="btn-editar-paciente">Editar</button>` : ''}
-          ${state.currentUser.papel === 'admin' ? `<button type="button" class="btn btn-danger" data-remove-paciente="${p.id}">Remover</button>` : ''}
+          ${podeRemoverPacientes() ? `<button type="button" class="btn btn-danger" data-remove-paciente="${p.id}">Remover</button>` : ''}
           <button type="button" class="btn" id="btn-fechar-detalhe-paciente">Fechar</button>
         </div>
       </div>
@@ -73,7 +76,10 @@ function renderFormPaciente(){
   return `
     <div class="modal-backdrop" id="backdrop-form-paciente">
       <div class="modal modal-lg">
-        <h2>${editando ? 'Editar paciente' : 'Cadastrar novo paciente'}</h2>
+        <div class="modal-header">
+          <h2>${editando ? 'Editar paciente' : 'Cadastrar novo paciente'}</h2>
+          <button type="button" class="modal-close" id="btn-fechar-form-paciente" aria-label="Fechar">&times;</button>
+        </div>
         <form id="form-paciente">
           <div class="field"><label>Nome</label><input id="np-nome" type="text" value="${p ? p.nome : ''}" required></div>
           <div class="field"><label>Data de nascimento</label><input id="np-nascimento" type="date" value="${p ? p.dataNascimento : ''}" required></div>
@@ -163,13 +169,14 @@ export function wirePacientes(render){
     });
   });
 
-  const btnFecharDetalhe = document.getElementById('btn-fechar-detalhe-paciente');
-  if(btnFecharDetalhe){
-    btnFecharDetalhe.addEventListener('click', () => {
-      state.pacienteDetalheId = null;
-      render();
-    });
-  }
+  const fecharDetalhePaciente = () => {
+    state.pacienteDetalheId = null;
+    render();
+  };
+  ['btn-fechar-detalhe-paciente', 'btn-fechar-detalhe-paciente-x'].forEach(id => {
+    const btn = document.getElementById(id);
+    if(btn) btn.addEventListener('click', fecharDetalhePaciente);
+  });
   const backdropDetalhe = document.getElementById('backdrop-detalhe-paciente');
   if(backdropDetalhe){
     backdropDetalhe.addEventListener('click', (e) => {
@@ -189,13 +196,14 @@ export function wirePacientes(render){
     });
   }
 
-  const btnCancelarForm = document.getElementById('btn-cancelar-form-paciente');
-  if(btnCancelarForm){
-    btnCancelarForm.addEventListener('click', () => {
-      state.formPacienteId = null;
-      render();
-    });
-  }
+  const fecharFormPaciente = () => {
+    state.formPacienteId = null;
+    render();
+  };
+  ['btn-cancelar-form-paciente', 'btn-fechar-form-paciente'].forEach(id => {
+    const btn = document.getElementById(id);
+    if(btn) btn.addEventListener('click', fecharFormPaciente);
+  });
   const backdropForm = document.getElementById('backdrop-form-paciente');
   if(backdropForm){
     backdropForm.addEventListener('click', (e) => {
